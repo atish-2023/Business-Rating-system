@@ -2,6 +2,7 @@ $(document).ready(function () {
     console.log("Application started. Verifying dependencies...");
     console.log("jQuery version:", $.fn.jquery);
     console.log("Bootstrap object detected:", typeof bootstrap !== 'undefined');
+    const RATY_IMAGE_PATH = 'assets/plugins/raty/images';
 
     // Helper to get/create Bootstrap Modal instances
     function getModal(id) {
@@ -43,11 +44,16 @@ $(document).ready(function () {
         const bsToast = bootstrap.Toast.getOrCreateInstance(toastEl);
 
         // Styling based on type
-        toastEl.classList.remove('bg-success', 'bg-danger', 'text-white');
+        toastEl.classList.remove('bg-success', 'bg-danger', 'bg-info', 'bg-warning', 'text-white');
+
         if (type === 'success') {
             toastEl.classList.add('bg-success', 'text-white');
-        } else if (type === 'error') {
+        } else if (type === 'error' || type === 'delete') {
             toastEl.classList.add('bg-danger', 'text-white');
+        } else if (type === 'edit') {
+            toastEl.classList.add('bg-info', 'text-white');
+        } else {
+            toastEl.classList.add('bg-secondary', 'text-white');
         }
 
         toastMsg.textContent = message;
@@ -57,20 +63,46 @@ $(document).ready(function () {
     // Initial fetch
     fetchListings();
 
-    // Initialize Raty for Rating Modal
-    if ($.fn.raty) {
-        $('#rating-stars').raty({
-            starType: 'i',
+    // Helper to initialize or re‑initialize the stars widget. We keep a reference
+    // to the instance so that we never create more than one group of stars.  The
+    // plugin stores itself under ``data('raty')`` when it is created.
+    let ratingInstance = null;
+
+    function initRatingStars(score) {
+        score = score || 0;
+        const $stars = $('#rating-stars');
+
+        // make sure previous instance is cleaned up; ``destroy`` is not part of
+        // the 3.1.1 code so we do a manual reset.  This removes all event handlers,
+        // empties the container and wipes the stored data so the call below behaves
+        // exactly like the first time.
+        if ($stars.data('raty')) {
+            $stars.off('.raty').empty().removeData('raty');
+        }
+
+        $stars.raty({
+            path: RATY_IMAGE_PATH,
+            starOff: 'star-off.png',
+            starOn: 'star-on.png',
+            starHalf: 'star-half.png',
+            number: 5,
             half: true,
             scoreName: 'rating',
-            score: 0,
-            starOn: 'fa-solid fa-star text-warning',
-            starOff: 'fa-regular fa-star text-muted',
-            starHalf: 'fa-solid fa-star-half-stroke text-warning',
+            score: score,
             click: function (score) {
                 $('#ratingInput').val(score);
             }
         });
+
+        // store instance for later score updates
+        ratingInstance = $stars.data('raty');
+        return ratingInstance;
+    }
+
+    // perform initial setup once when the page loads (modal may never be opened
+    // but the constructor costs almost nothing)
+    if ($.fn.raty) {
+        initRatingStars(0);
     } else {
         console.error("Raty plugin not loaded correctly. Check if jquery.raty.js is accessible.");
         showToast('error', "Warning: Rating plugin failed to load. Please check your internet connection or script paths.");
@@ -91,11 +123,12 @@ $(document).ready(function () {
                         $(this).raty({
                             readOnly: true,
                             score: score,
+                            number: 5,
                             half: true,
-                            starType: 'i',
-                            starOn: 'fa-solid fa-star text-warning',
-                            starOff: 'fa-regular fa-star text-muted',
-                            starHalf: 'fa-solid fa-star-half-stroke text-warning'
+                            path: RATY_IMAGE_PATH,
+                            starOff: 'star-off.png',
+                            starOn: 'star-on.png',
+                            starHalf: 'star-half.png'
                         });
                     });
                 }
@@ -162,7 +195,7 @@ $(document).ready(function () {
                 const modal = getModal('deleteConfirmModal');
                 if (modal) modal.hide(); // Close confirmation modal
                 if (response.status === 'success') {
-                    showToast('success', response.message);
+                    showToast('delete', response.message);
                     fetchListings();
                 } else {
                     showToast('error', response.message);
@@ -176,9 +209,115 @@ $(document).ready(function () {
         });
     });
 
+    // Restrict Phone input to digits only, 10 digits max, and starting with 6-9 (Indian Mobile Standard)
+    $(document).on('keypress', '#phone, #reviewer_phone', function (e) {
+        const charCode = e.which || e.keyCode;
+        const currentValue = $(this).val();
+
+        // 1. Block non-digits (Accept only 0-9)
+        if (charCode < 48 || charCode > 57) {
+            return false;
+        }
+
+        // 2. Apply requested logic: Block first digits 0-5
+        if (currentValue.length === 0 && (charCode < 54 || charCode > 57)) {
+            return false; // Blocks first digits 0-5 (Only allows 6, 7, 8, 9)
+        }
+
+        // 3. Apply requested logic: Blocks more than 10 digits
+        if (currentValue.length >= 10) {
+            return false; // Blocks more than 10 digits
+        }
+    });
+
+    // Clear validation on input
+    $('#businessForm input, #businessForm textarea, #ratingForm input').on('input', function () {
+        $(this).removeClass('is-invalid');
+    });
+
+    // Frontend Validation function for Business
+    function validateBusinessForm() {
+        let isValid = true;
+        const name = $('#name');
+        const address = $('#address');
+        const phone = $('#phone');
+        const email = $('#email');
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
+        const phoneRegex = /^[6789][0-9]{9}$/;
+
+        if (name.val().trim() === "") { name.addClass('is-invalid'); isValid = false; }
+        if (address.val().trim() === "") { address.addClass('is-invalid'); isValid = false; }
+
+        if (email.val().trim() === "") {
+            email.addClass('is-invalid');
+            showToast('error', "Email is required");
+            isValid = false;
+        } else if (!emailRegex.test(email.val())) {
+            email.addClass('is-invalid');
+            showToast('error', "Only @gmail.com emails are accepted.");
+            isValid = false;
+        }
+
+        if (phone.val().trim() === "") {
+            phone.addClass('is-invalid');
+            showToast('error', "Mobile number is required");
+            isValid = false;
+        } else if (!phoneRegex.test(phone.val())) {
+            phone.addClass('is-invalid');
+            showToast('error', "Invalid mobile number. Must be 10 digits and start with 6, 7, 8, or 9.");
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    // Frontend Validation for Rating
+    function validateRatingForm() {
+        let isValid = true;
+        const name = $('#reviewer_name');
+        const email = $('#reviewer_email');
+        const phone = $('#reviewer_phone');
+        const rating = $('#ratingInput');
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
+        const phoneRegex = /^[6789][0-9]{9}$/;
+
+        if (name.val().trim() === "") { name.addClass('is-invalid'); isValid = false; }
+
+        if (email.val().trim() === "") {
+            email.addClass('is-invalid');
+            showToast('error', "Email is required");
+            isValid = false;
+        } else if (!emailRegex.test(email.val())) {
+            email.addClass('is-invalid');
+            showToast('error', "Only @gmail.com emails are accepted.");
+            isValid = false;
+        }
+
+        if (phone.val().trim() === "") {
+            phone.addClass('is-invalid');
+            showToast('error', "Mobile number is required");
+            isValid = false;
+        } else if (!phoneRegex.test(phone.val())) {
+            phone.addClass('is-invalid');
+            showToast('error', "Invalid mobile number. Must be 10 digits and start with 6, 7, 8, or 9.");
+            isValid = false;
+        }
+
+        if (!rating.val() || rating.val() == 0) {
+            showToast('error', "Please select a rating star.");
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
     // Business Form Submission (Add/Update)
     $('#businessForm').on('submit', function (e) {
         e.preventDefault();
+
+        // Perform Validation
+        if (!validateBusinessForm()) return;
+
         const id = $('#businessId').val();
         const url = id ? 'ajax/update_business.php' : 'ajax/create_business.php';
 
@@ -191,10 +330,14 @@ $(document).ready(function () {
                 if (response.status === 'success') {
                     const modal = getModal('businessModal');
                     if (modal) modal.hide();
-                    showToast('success', response.message);
+                    const toastType = id ? 'edit' : 'success';
+                    showToast(toastType, response.message);
                     fetchListings();
                 } else {
                     showToast('error', response.message);
+                    // Specific field highlighting based on backend response
+                    if (response.message.toLowerCase().includes('email')) $('#email').addClass('is-invalid');
+                    if (response.message.toLowerCase().includes('phone')) $('#phone').addClass('is-invalid');
                 }
             },
             error: function () {
@@ -212,9 +355,13 @@ $(document).ready(function () {
         $('#ratingBusinessId').val(business_id);
         $('#ratingInput').val(0);
 
-        // Reset Raty stars
+        // ensure the widget is fresh every time the modal is shown.  Calling
+        // ``initRatingStars`` will destroy any previous instance before creating a
+        // new one, which is the safe re‑initialization pattern mentioned in the
+        // requirements.  This also guarantees the correct image path is used and we
+        // never end up with duplicate stars.
         if ($.fn.raty) {
-            $('#rating-stars').raty('score', 0);
+            ratingInstance = initRatingStars(0);
         }
 
         const modal = getModal('ratingModal');
@@ -224,12 +371,9 @@ $(document).ready(function () {
     // Rating Form Submission
     $('#ratingForm').on('submit', function (e) {
         e.preventDefault();
-        const rating = $('#ratingInput').val();
 
-        if (!rating || rating == 0) {
-            showToast('error', "Please select a rating star.");
-            return;
-        }
+        // Perform Validation
+        if (!validateRatingForm()) return;
 
         $.ajax({
             url: 'ajax/add_rating.php',
@@ -244,6 +388,8 @@ $(document).ready(function () {
                     fetchListings();
                 } else {
                     showToast('error', response.message);
+                    if (response.message.toLowerCase().includes('email')) $('#reviewer_email').addClass('is-invalid');
+                    if (response.message.toLowerCase().includes('phone')) $('#reviewer_phone').addClass('is-invalid');
                 }
             },
             error: function () {

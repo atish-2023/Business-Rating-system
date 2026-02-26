@@ -17,6 +17,7 @@
             <table class="table table-hover align-middle" id="businessTable">
                 <thead>
                     <tr>
+                        <th>S.No</th>
                         <th>ID</th>
                         <th>Business Name</th>
                         <th>Address</th>

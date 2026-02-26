@@ -8,20 +8,22 @@ try {
             FROM businesses b 
             LEFT JOIN ratings r ON b.id = r.business_id 
             GROUP BY b.id 
-            ORDER BY b.created_at DESC";
+            ORDER BY b.id ASC";
     
     $stmt = $pdo->query($sql);
     $businesses = $stmt->fetchAll();
 
     if (empty($businesses)) {
-        echo '<tr><td colspan="7" class="text-center">No businesses found.</td></tr>';
+        echo '<tr><td colspan="8" class="text-center">No businesses found.</td></tr>';
         exit;
     }
 
+    $sno = 1;
     foreach ($businesses as $row) {
         $avgRating = round($row['avg_rating'], 1);
         ?>
         <tr data-id="<?= $row['id'] ?>">
+            <td><?= $sno++ ?></td>
             <td><?= $row['id'] ?></td>
             <td class="business-name"><?= htmlspecialchars($row['name']) ?></td>
             <td class="business-address"><?= htmlspecialchars($row['address']) ?></td>

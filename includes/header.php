@@ -9,7 +9,7 @@
     <!-- Font Awesome for stars (FA 6.x) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Raty CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/raty-js@3.1.1/lib/jquery.raty.css">
+    <link rel="stylesheet" href="assets/plugins/raty/jquery.raty.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>

@@ -14,6 +14,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
+    // Email Validation - Strictly requiring @gmail.com
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !str_ends_with(strtolower($email), '@gmail.com')) {
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => 'Only @gmail.com emails are accepted.']);
+        exit;
+    }
+
+    // Indian Phone Validation (Starts with 6, 7, 8, 9 and total 10 digits)
+    if (!preg_match('/^[6789][0-9]{9}$/', $phone)) {
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => 'Invalid phone number. Must be 10 digits and start with 6, 7, 8, or 9.']);
+        exit;
+    }
+
     try {
         // Check if rating exists for this business with same email OR same phone
         $checkSql = "SELECT id FROM ratings WHERE business_id = ? AND (email = ? OR phone = ?)";
