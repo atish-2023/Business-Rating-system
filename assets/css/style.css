@@ -38,3 +38,16 @@ body {
 #rating-stars {
     margin-bottom: 15px;
 }
+
+/* Professional Notification Styles */
+.toast-container {
+    z-index: 9999 !important;
+    /* Extremely high to be above modals */
+    pointer-events: none;
+    /* Allow clicks to pass through container if needed */
+}
+
+.toast {
+    pointer-events: auto;
+    /* Buttons on toast remain clickable */
+}

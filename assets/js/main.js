@@ -16,7 +16,7 @@ $(document).ready(function () {
         try {
             bs = window.bootstrap || (typeof bootstrap !== 'undefined' ? bootstrap : null);
         } catch (e) {
-            console.warn("Standard 'bootstrap' variable not accessible, checking window...");
+            // console.warn("Standard 'bootstrap' variable not accessible, checking window..."); // Removed as per instruction
             bs = window.bootstrap;
         }
 
@@ -24,9 +24,34 @@ $(document).ready(function () {
             return bs.Modal.getOrCreateInstance(el);
         } else {
             console.error("FATAL: Bootstrap 5 JS (Modal) not detected. Check footer.php script links.");
-            alert("Application Error: Bootstrap 5 library failed to load. Please check your internet connection.");
+            showToast('error', "Application Error: Bootstrap 5 library failed to load. Please check your internet connection.");
             return null;
         }
+    }
+
+    // Reusable Professional Toast Function
+    function showToast(type, message) {
+        const toastEl = document.getElementById('liveToast');
+        const toastMsg = document.getElementById('toastMessage');
+        // Ensure bootstrap is loaded before trying to create Toast instance
+        if (typeof bootstrap === 'undefined' || !bootstrap.Toast) {
+            console.error("Bootstrap Toast component not available. Cannot show toast.");
+            // Fallback to alert if toast system is broken
+            alert(message);
+            return;
+        }
+        const bsToast = bootstrap.Toast.getOrCreateInstance(toastEl);
+
+        // Styling based on type
+        toastEl.classList.remove('bg-success', 'bg-danger', 'text-white');
+        if (type === 'success') {
+            toastEl.classList.add('bg-success', 'text-white');
+        } else if (type === 'error') {
+            toastEl.classList.add('bg-danger', 'text-white');
+        }
+
+        toastMsg.textContent = message;
+        bsToast.show();
     }
 
     // Initial fetch
@@ -48,7 +73,7 @@ $(document).ready(function () {
         });
     } else {
         console.error("Raty plugin not loaded correctly. Check if jquery.raty.js is accessible.");
-        alert("Warning: Rating plugin failed to load. Please check your internet connection or script paths.");
+        showToast('error', "Warning: Rating plugin failed to load. Please check your internet connection or script paths.");
     }
 
     // Helper function to fetch listings
@@ -76,7 +101,7 @@ $(document).ready(function () {
                 }
             },
             error: function () {
-                alert("Error fetching listings. Please check database connection.");
+                showToast('error', "Database connection failed or script error.");
             }
         });
     }
@@ -117,25 +142,38 @@ $(document).ready(function () {
         if (modal) modal.show();
     });
 
-    // Delete Business
+    // Delete Business - Open Confirm Modal
     $(document).on('click', '.delete-btn', function () {
         const id = $(this).data('id');
-        if (confirm('Are you sure you want to delete this business? All ratings will also be removed.')) {
-            $.ajax({
-                url: 'ajax/delete_business.php',
-                type: 'POST',
-                data: { id: id },
-                dataType: 'json',
-                success: function (response) {
-                    if (response.status === 'success') {
-                        alert(response.message);
-                        fetchListings();
-                    } else {
-                        alert(response.message);
-                    }
+        $('#deleteBusinessId').val(id); // Store ID in a hidden field in the confirmation modal
+        const modal = getModal('deleteConfirmModal');
+        if (modal) modal.show();
+    });
+
+    // Confirm Delete Click
+    $('#confirmDeleteBtn').on('click', function () {
+        const id = $('#deleteBusinessId').val();
+        $.ajax({
+            url: 'ajax/delete_business.php',
+            type: 'POST',
+            data: { id: id },
+            dataType: 'json',
+            success: function (response) {
+                const modal = getModal('deleteConfirmModal');
+                if (modal) modal.hide(); // Close confirmation modal
+                if (response.status === 'success') {
+                    showToast('success', response.message);
+                    fetchListings();
+                } else {
+                    showToast('error', response.message);
                 }
-            });
-        }
+            },
+            error: function () {
+                const modal = getModal('deleteConfirmModal');
+                if (modal) modal.hide();
+                showToast('error', "Error deleting business. Please try again.");
+            }
+        });
     });
 
     // Business Form Submission (Add/Update)
@@ -153,11 +191,16 @@ $(document).ready(function () {
                 if (response.status === 'success') {
                     const modal = getModal('businessModal');
                     if (modal) modal.hide();
-                    alert(response.message);
+                    showToast('success', response.message);
                     fetchListings();
                 } else {
-                    alert(response.message);
+                    showToast('error', response.message);
                 }
+            },
+            error: function () {
+                const modal = getModal('businessModal');
+                if (modal) modal.hide();
+                showToast('error', "Error saving business. Please try again.");
             }
         });
     });
@@ -184,7 +227,7 @@ $(document).ready(function () {
         const rating = $('#ratingInput').val();
 
         if (!rating || rating == 0) {
-            alert("Please select a rating.");
+            showToast('error', "Please select a rating star.");
             return;
         }
 
@@ -197,11 +240,16 @@ $(document).ready(function () {
                 if (response.status === 'success') {
                     const modal = getModal('ratingModal');
                     if (modal) modal.hide();
-                    alert(response.message);
+                    showToast('success', response.message);
                     fetchListings();
                 } else {
-                    alert(response.message);
+                    showToast('error', response.message);
                 }
+            },
+            error: function () {
+                const modal = getModal('ratingModal');
+                if (modal) modal.hide();
+                showToast('error', "Error submitting rating. Please try again.");
             }
         });
     });
