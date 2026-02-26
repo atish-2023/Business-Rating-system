@@ -1,0 +1,40 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.table thead th {
+    background-color: #f1f3f5;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Raty styles - simple overrides if needed */
+.raty-star {
+    cursor: pointer;
+}
+
+.avg-rating-display {
+    cursor: pointer;
+}
+
+.modal-header {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+}
+
+#rating-stars {
+    margin-bottom: 15px;
+}
