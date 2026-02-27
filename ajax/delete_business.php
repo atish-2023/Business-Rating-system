@@ -3,6 +3,7 @@ require_once '../db.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = $_POST['id'] ?? '';
+    $id = str_replace('BN', '', $id); // Strip BN prefix
 
     if (empty($id)) {
         header('Content-Type: application/json');

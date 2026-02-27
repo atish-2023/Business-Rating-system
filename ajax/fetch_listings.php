@@ -21,21 +21,22 @@ try {
     $sno = 1;
     foreach ($businesses as $row) {
         $avgRating = round($row['avg_rating'], 1);
+        $businessId = 'BN' . $row['id'];
         ?>
-        <tr data-id="<?= $row['id'] ?>">
+        <tr data-id="<?= $businessId ?>">
             <td><?= $sno++ ?></td>
-            <td><?= $row['id'] ?></td>
+            <td><?= $businessId ?></td>
             <td class="business-name"><?= htmlspecialchars($row['name']) ?></td>
             <td class="business-address"><?= htmlspecialchars($row['address']) ?></td>
             <td class="business-phone"><?= htmlspecialchars($row['phone']) ?></td>
             <td class="business-email"><?= htmlspecialchars($row['email']) ?></td>
             <td>
                 <!-- Read-only Raty for Average Rating -->
-                <div class="avg-rating-display" data-score="<?= $avgRating ?>" data-id="<?= $row['id'] ?>"></div>
+                <div class="avg-rating-display" data-score="<?= $avgRating ?>" data-id="<?= $businessId ?>"></div>
             </td>
             <td>
                 <button class="btn btn-sm btn-info edit-btn" 
-                        data-id="<?= $row['id'] ?>" 
+                        data-id="<?= $businessId ?>" 
                         data-name="<?= htmlspecialchars($row['name']) ?>"
                         data-address="<?= htmlspecialchars($row['address']) ?>"
                         data-phone="<?= htmlspecialchars($row['phone']) ?>"
@@ -44,7 +45,7 @@ try {
                     <i class="fas fa-edit"></i>
                 </button>
                 <button class="btn btn-sm btn-danger delete-btn" 
-                        data-id="<?= $row['id'] ?>"
+                        data-id="<?= $businessId ?>"
                         title="Delete">
                     <i class="fas fa-trash"></i>
                 </button>

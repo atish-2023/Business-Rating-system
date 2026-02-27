@@ -12,12 +12,101 @@ body {
     border-bottom: 2px solid #dee2e6;
 }
 
-/* Raty styles - simple overrides if needed */
-.raty-star {
-    cursor: pointer;
+/* Table responsive container fix */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
+/* Prevent table from being compressed */
+#businessTable {
+    width: 100%;
+    min-width: 1100px;
+    margin-bottom: 0;
+}
+
+/* Column width distribution */
+#businessTable th,
+#businessTable td {
+    vertical-align: middle;
+    padding: 0.75rem !important;
+}
+
+#businessTable th:nth-child(1),
+#businessTable td:nth-child(1) {
+    width: 5%;
+    text-align: center;
+}
+
+#businessTable th:nth-child(2),
+#businessTable td:nth-child(2) {
+    width: 7%;
+    text-align: center;
+}
+
+#businessTable th:nth-child(3),
+#businessTable td:nth-child(3) {
+    width: 13%;
+    white-space: nowrap;
+}
+
+#businessTable th:nth-child(4),
+#businessTable td:nth-child(4) {
+    width: 22%;
+}
+
+#businessTable th:nth-child(5),
+#businessTable td:nth-child(5) {
+    width: 11%;
+    white-space: nowrap;
+}
+
+#businessTable th:nth-child(6),
+#businessTable td:nth-child(6) {
+    width: 16%;
+    white-space: nowrap;
+}
+
+#businessTable th:nth-child(7),
+#businessTable td:nth-child(7) {
+    width: 16%;
+    white-space: nowrap;
+}
+
+#businessTable th:nth-child(8),
+#businessTable td:nth-child(8) {
+    width: 10%;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Raty stars - prevent wrapping */
 .avg-rating-display {
+    cursor: pointer;
+    display: inline-block;
+    white-space: nowrap;
+    min-width: 100px;
+}
+
+/* Business name and address content */
+.business-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.business-address {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.business-phone,
+.business-email {
+    white-space: nowrap;
+}
+
+/* Raty styles - simple overrides if needed */
+.raty-star {
     cursor: pointer;
 }
 

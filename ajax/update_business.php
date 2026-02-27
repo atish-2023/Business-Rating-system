@@ -3,6 +3,7 @@ require_once '../db.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = $_POST['id'] ?? '';
+    $id = str_replace('BN', '', $id); // Strip BN prefix
     $name = $_POST['name'] ?? '';
     $address = $_POST['address'] ?? '';
     $phone = $_POST['phone'] ?? '';
