@@ -44,7 +44,81 @@ TECHNOLOGIES USED
 No framework is used.
 
 ------------------------------------------------------------------------
- framework is used.
+
+
+🔧 SYSTEM REQUIREMENTS
+
+Before running this project, make sure the following software is installed on your system:
+
+XAMPP (Apache + MySQL)
+
+PHP (comes with XAMPP)
+
+MySQL Server (via XAMPP)
+
+Web Browser (Chrome / Edge recommended)
+
+💻 REQUIRED INSTALLATION
+1️⃣ Install XAMPP
+
+Download and install XAMPP from the official website.
+
+XAMPP includes:
+
+Apache Server
+
+MySQL Server
+
+PHP
+
+No separate PHP installation is required if you are using XAMPP.
+
+2️⃣ Start Services
+
+After installing XAMPP:
+
+Open XAMPP Control Panel
+
+Start Apache
+
+Start MySQL
+
+Both services must be running before accessing the project.
+
+3️⃣ Database Setup
+
+Open phpMyAdmin
+
+Create database:
+
+business_rating_system
+
+Import the file:
+
+sql/structure.sql
+
+4️⃣ Project Location
+
+Place the project folder inside:
+
+C:/xampp/htdocs/
+
+Then open in browser:
+
+http://localhost/business_listing_rating_system
+⚠ IMPORTANT NOTE
+
+Make sure MySQL port (default 3306) is not used by another application.
+
+If MySQL is not starting, check XAMPP logs.
+
+Ensure db.php credentials match your MySQL setup.
+
+Apache and MySQL must be running before opening the project.
+
+--------------------------------------------------------------------------
+
+ 
 
 📁 Folder Structure
 project-folder/
@@ -70,6 +144,9 @@ project-folder/
 │   └── structure.sql       (Database structure)
 │
 └── README.md
+
+-------------------------------------------------------------------------
+
 🗃️ Database Structure
 
 This project uses two tables.
